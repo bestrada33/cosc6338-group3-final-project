@@ -1,0 +1,79 @@
+# Keras tuner logs
+*tuning
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Virtual Environments
+venv/
+env/
+.venv/
+ENV/
+
+# Jupyter runtime and kernels
+*.pid
+*.log
+*.sqlite
+*.nbconvert.ipynb
+*.ipynb~  # temporary files
+profile_default/
+
+# Mac OS
+.DS_Store
+
+# Environment / secrets / config
+.env
+.env.*
+*.secret
+config.json
+
+# Data files (optional – uncomment if you want to ignore data)
+# data/
+# *.csv
+# *.tsv
+# *.parquet
+# *.h5
+# *.pkl
+
+# Test and coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+.cache/
+.pytest_cache/
+
+# mypy, pylint, pyright
+.mypy_cache/
+.pyright/
+.pylint.d/
+
+# Jupyter lab workspace
+.lab/
+
+# Jupyter Notebook extensions
+.jupyter/lab/workspaces/
+
+# IPython history
+.history
+
+# OS or IDE-specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.bak
