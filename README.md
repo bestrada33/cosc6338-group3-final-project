@@ -1,6 +1,8 @@
 # Machine Learning for Synthetic DNA Classification
 COSC 6338
+
 Group 3
+
 Matthew Kastl, Beto Estrada, Sainadth Pagadala, and Malaka Sudhakara Reddy
 
 ## Requirements
