@@ -1,0 +1,4 @@
+{
+    "data_file_path": "data/synthetic_dna_dataset.csv",
+    "model_name": "MLP"
+}

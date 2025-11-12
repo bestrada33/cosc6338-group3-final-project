@@ -8,7 +8,7 @@ line argument. The experiment is then parsed in this file. The config can be pla
 the `model_configs` folder. The tuning/testing results + model weights for each model are placed in the `results` 
 directory. Multiple experiment configuration files can be passed.
 
-Example run: `python train_model.py -f model_configs/config.json`
+Example run: `python train_model.py -f model_configs/model_config.json`
 """ 
 #---------------------------------------------
 # 
