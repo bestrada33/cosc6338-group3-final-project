@@ -8,7 +8,7 @@ import numpy as np
 from keras.layers import Input, Dense, Dropout
 from keras.models import Model, load_model, save_model
 from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, TensorBoard
 import keras.metrics as km
 from keras_tuner import GridSearch, Objective
 from sklearn.model_selection import train_test_split, KFold
@@ -22,7 +22,7 @@ from src.utils.file_operations import ensure_dir
 def build_MLP_model(hp=None, params=None, input_dim=None, y_targets=None,
                     loss_function = 'categorical_crossentropy'):
       """
-      Builds a multi-output Keras model for multi-label, multi-class classification.
+      Builds a Keras model for multi-label, multi-class classification.
 
       Args:
           hp: HyperParameters object (used during Keras Tuner search)
@@ -35,7 +35,7 @@ def build_MLP_model(hp=None, params=None, input_dim=None, y_targets=None,
       """
       if hp is not None:
           num_layers = hp.Choice('num_layers', [1])
-          neurons = hp.Choice('neurons', [8, 12, 20, 30])
+          neurons = hp.Int('neurons', min_value=3, max_value=50, step=1)
           learning_rate = hp.Choice('lr', [1e-3, 1e-4, 1e-5])
       elif params is not None:
           num_layers = params['num_layers']
@@ -50,10 +50,11 @@ def build_MLP_model(hp=None, params=None, input_dim=None, y_targets=None,
 
       # Hidden layers with Dropout
       for i in range(num_layers):
+          x = Dropout(0.5)(x)
           x = Dense(neurons, activation='tanh', kernel_initializer='he_normal')(x)
-          x = Dropout(0.4)(x)
 
-      # Output Layer (softmax activation function for classification output)
+      # Output Layer(s) (softmax activation function for classification output)
+      # Separate output layer for each label
       outputs = {}
       for name, y_arr in y_targets.items():
           n_classes = y_arr.shape[1]
@@ -120,7 +121,10 @@ def tune_model(x_train, y_train, validation_data, directory, project_name,
             verbose=0
         )
 
-        callbacks = [early_stopping]
+        tensor_board_logs_path = directory + f'{project_name}/tb_logs/'
+        tensor_board = TensorBoard(tensor_board_logs_path, update_freq='epoch')
+
+        callbacks = [early_stopping, tensor_board]
 
         tuner.search(
             x_train, y_train,
@@ -293,7 +297,7 @@ def train_ensemble(X_train, y_train, validation_data, best_hyperparams, model_di
 
 def model_training(X_train, y_train, results_directory):
     # Create folds for k-fold validation
-    num_folds = 10
+    num_folds = 6
     kfolds = KFold(n_splits=num_folds, shuffle=True, random_state=42)
 
     # Perform k-fold cross-validation and return metrics for all folds
