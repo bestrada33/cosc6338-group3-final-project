@@ -43,7 +43,12 @@ def run_ml_pipeline(df_data, results_directory):
         df_predictions = mlp.predict(model_ensemble, X_test)
 
         # Add actual values for each label to predictions
-        df_predictions[['True_Class_Label', 'True_Disease_Risk']] = [y_test_class, y_test_risk]
+        true_class_labels = y_test_class.argmax(axis=1)
+        true_risk_labels  = y_test_risk.argmax(axis=1)
+        df_predictions[['True_Class_Label', 'True_Disease_Risk']] = pd.DataFrame({
+            'True_Class_Label': true_class_labels,
+            'True_Disease_Risk': true_risk_labels
+            })
 
         # Save test predictions to csv
         test_predictions_csv_path = test_results_directory + 'predictions.csv'
