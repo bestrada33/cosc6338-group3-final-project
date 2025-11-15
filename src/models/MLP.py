@@ -19,6 +19,34 @@ from functools import partial
 
 from src.utils.file_operations import ensure_dir
 
+def model_training(X_train, y_train, results_directory):
+    # Create folds for k-fold validation
+    num_folds = 6
+    kfolds = KFold(n_splits=num_folds, shuffle=True, random_state=42)
+
+    # Perform k-fold cross-validation and return metrics for all folds
+    cv_metrics = kfold_cross_validation(kfolds, X_train, y_train, results_directory)
+    
+    # Find the trial ID with the best metric score on average over all folds
+    best_trial_id = find_best_trial_id(cv_metrics)
+
+    # Find all rows with the same trial ID to extract the metrics of best hyperparameters
+    df_best_trial = cv_metrics[cv_metrics['trial_id'] == best_trial_id].copy()
+
+    # Save metrics with best trial ID to csv
+    tuning_results_directory = results_directory + 'tuning/'
+    cv_metrics_path = tuning_results_directory + 'best_cv_metrics.csv'
+    df_best_trial.to_csv(cv_metrics_path)
+
+    # Extract best hyperparameters from first row of the best metrics df
+    best_hyperparams = df_best_trial.loc[df_best_trial.index[0], ['num_layers', 'neurons', 'lr']].to_dict()
+    
+    # Train final model ensemble using full training set and best hyperparameters
+    model_ensemble = train_final_models(X_train, y_train, best_hyperparams, results_directory)
+
+    return model_ensemble
+
+
 def build_MLP_model(hp=None, params=None, input_dim=None, y_targets=None,
                     loss_function = 'categorical_crossentropy'):
       """
@@ -208,7 +236,6 @@ def kfold_cross_validation(kfolds, X_train, y_train, results_directory):
         # Set the project folder name as the current fold number
         tuning_project_name = f'fold_{i}'
 
-
         start = time.time()
         df_tuning_results = tune_model(X_fold_train, y_fold_train, validation_data, 
                                        tuning_results_directory, tuning_project_name)
@@ -245,7 +272,6 @@ def train_final_models(X_train, y_train, best_hyperparams, results_directory):
     ensure_dir(model_directory)
 
     start = time.time()
-    
     # Train ensemble models using best hyperparameters
     ensemble_models = train_ensemble(X_train, y_train, validation_data, best_hyperparams, model_directory)
     end = time.time()
@@ -291,34 +317,6 @@ def train_ensemble(X_train, y_train, validation_data, best_hyperparams, model_di
             save_model(model, model_file_path)
         
         model_ensemble.append(model)
-
-    return model_ensemble
-
-
-def model_training(X_train, y_train, results_directory):
-    # Create folds for k-fold validation
-    num_folds = 6
-    kfolds = KFold(n_splits=num_folds, shuffle=True, random_state=42)
-
-    # Perform k-fold cross-validation and return metrics for all folds
-    cv_metrics = kfold_cross_validation(kfolds, X_train, y_train, results_directory)
-    
-    # Find the trial ID with the best metric score on average over all folds
-    best_trial_id = find_best_trial_id(cv_metrics)
-
-    # Find all rows with the same trial ID to extract the metrics of best hyperparameters
-    df_best_trial = cv_metrics[cv_metrics['trial_id'] == best_trial_id].copy()
-
-    # Save metrics with best trial ID to csv
-    tuning_results_directory = results_directory + 'tuning/'
-    cv_metrics_path = tuning_results_directory + 'best_cv_metrics.csv'
-    df_best_trial.to_csv(cv_metrics_path)
-
-    # Extract best hyperparameters from first row of the best metrics df
-    best_hyperparams = df_best_trial.loc[df_best_trial.index[0], ['num_layers', 'neurons', 'lr']].to_dict()
-    
-    # Train final model ensemble using full training set and best hyperparameters
-    model_ensemble = train_final_models(X_train, y_train, best_hyperparams, results_directory)
 
     return model_ensemble
 
