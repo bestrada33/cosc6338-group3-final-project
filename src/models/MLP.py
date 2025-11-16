@@ -63,7 +63,7 @@ def build_MLP_model(hp=None, params=None, input_dim=None, y_targets=None,
       """
       if hp is not None:
           num_layers = hp.Choice('num_layers', [1])
-          neurons = hp.Int('neurons', min_value=3, max_value=50, step=1)
+          neurons = hp.Choice('neurons', [20, 50, 100, 200])
           learning_rate = hp.Choice('lr', [1e-3, 1e-4, 1e-5])
       elif params is not None:
           num_layers = params['num_layers']

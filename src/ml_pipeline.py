@@ -77,8 +77,11 @@ def run_ml_pipeline(df_data, results_directory):
 
 def preprocess_data(df):
     # Remove columns that will not be used as features or targets
-    df_preprocess = df.drop(columns=['Sample_ID', 'Sequence_Length', 'Sequence'], axis = 1)
+    df_preprocess = df.drop(columns=['Sample_ID', 'Sequence_Length'], axis = 1)
 
+    # Split the sequence into multiple columns and convert it to a numeric ascii number
+    df_preprocess = split_sequence(df_preprocess)
+    
     # Split up features and targets
     df_feature = df_preprocess.drop(columns=['Class_Label', 'Disease_Risk'], axis = 1)
     df_target1 = df_preprocess[['Class_Label']]
@@ -97,3 +100,17 @@ def preprocess_data(df):
     y = {'Class_Label': y1, 'Disease_Risk': y2}
 
     return X, y
+
+
+def split_sequence(df):
+    # Split the sequence into multiple columns and convert it to a numeric ascii number
+    max_len = df['Sequence'].str.len().max()
+    ascii_df = pd.DataFrame([
+        [ord(c) for c in str(val).ljust(max_len, '\0')]
+        for val in df['Sequence']
+    ], columns=[f'char_{i}_ascii' for i in range(max_len)])
+    ascii_df
+    df = df.drop('Sequence', axis=1)
+    df = pd.concat([df, ascii_df], axis=1)
+
+    return df
